@@ -48,12 +48,16 @@ def get_stock_data():
     idx_diffs.index = idx_diffs.index.droplevel(0)
     idx_diffs = idx_diffs.dropna().droplevel(level=0)
 
+    interesting_diff = diffs[abs(diffs) > 2.99].append(idx_diffs).round(1)
+    interesting_diff.index = interesting_diff.index.map(lambda x: '<a href="https://finance.yahoo.com/quote/' + x + '">' + x + '</a>')
 
-    return diffs[abs(diffs) > 2.99].append(idx_diffs).round(1).to_dict()
+    return interesting_diff.reset_index().to_string(index=False, header=False)
 
 
 
 if __name__ == '__main__':
+
+    current_stock_data = get_stock_data()
     
     bot = telegram.Bot(token=os.environ['STOCKSUPORDOWNBOT_TOKEN'])
-    bot.send_message(chat_id='@stocksupordown',text='hi', parse_mode=telegram.ParseMode.HTML)
+    bot.send_message(chat_id='@stocksupordown',text=current_stock_data, parse_mode=telegram.ParseMode.HTML)
